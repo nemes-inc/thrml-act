@@ -1,0 +1,13 @@
+### CORE ###
+# Firebase
+.firebaserc
+firebase.json
+
+# Environment
+.env
+
+# Config
+token*.txt
+token*.json
+config_*.json
+credentials.json

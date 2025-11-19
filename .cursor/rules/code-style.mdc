@@ -1,0 +1,78 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Code Guidelines
+
+## Function Grouping
+
+- Group related functions together with common section comments like `/** Seed Functions **/`
+- Use descriptive section headers to organize code by functionality (e.g., `/** Core Functions **/`, `/** Export Functions **/`)
+
+## Comments Policy
+
+- Do not add obvious comments that simply restate what the code does
+- Avoid comments like "// Get the document", "// Convert to JSON", "// Check if exists"
+- Only add comments that explain business logic, complex algorithms, or non-obvious decisions
+- Clean code should be self-explanatory through good variable and function names
+
+## Code Generation Preferences
+
+### Go Code
+
+- Use clear, descriptive variable and function names
+- Prefer concise, readable code over verbose comments
+- Group related functionality logically
+- Use proper error handling without commenting every error check
+- Group common code paths together without unnecessary newlines between related functions
+- Avoid splitting functionality into very small individual functions
+- Prefer slightly larger, cohesive functions over mini-functions that become hard to process over time
+- Keep related operations together in single functions rather than creating many tiny helper functions
+
+### Python Code
+
+- Group related functions and classes together without extra newlines
+- Keep related error handling and validation logic grouped
+
+### Frontend Code
+
+- For `<script>` and `<style>` tags, do not add initial padding or extra indentation
+- All new components must strictly adhere to the project's existing styling and color palette. Do not introduce new styles unless explicitly instructed
+- Avoid using elevation or "raise" animations (e.g., box-shadow transitions on hover) for interactive elements like buttons or text containers
+- When editing CSS, maintain the existing multi-line format and indentation. Do not collapse multiple properties onto a single line
+- Begin code on the line immediately following an opening tag, without any blank lines
+
+### Card Layout and Alignment
+
+- Use `display: flex`, `flex-direction: column`, and `height: 100%` on card containers to ensure uniform heights
+- Use `flex-grow: 1` on content sections and `margin-top: auto` on bottom elements (buttons, links) to align them horizontally across all cards
+- Add `align-items: stretch` to grid containers to maintain equal card heights
+
+### Text and Label Formatting
+
+- Use sentence case for all user-facing text (only first word capitalized)
+- Examples: "Attention span" not "Attention Span", "Processing speed" not "Processing Speed"
+- Avoid special characters like colons (:) in tooltips and labels
+- Use plain English sentences without unnecessary punctuation
+- Format tooltips as "Dataset name value" instead of "Dataset Name: Value"
+- Examples: "Current performance 71" not "Current Performance: 71"
+
+### General
+
+- Focus on clean, maintainable code
+- Comments should add value, not noise
+- Self-documenting code is preferred
+- Only comment complex business logic or non-obvious implementations
+
+## Documentation Policy
+
+- **Do NOT create documentation files unless explicitly requested by the user**
+- Avoid creating README.md, DOCUMENTATION.md, or similar files proactively
+- When user provides specific documentation requests, then create appropriate files
+
+## Requirements Handling
+
+- When user attaches a `requirements.md` or similar requirements file, ensure all completed tasks are marked as ✅ COMPLETE at the end of execution
+- Update task status systematically before concluding work
+- Verify all deliverables match the requirements checklist
