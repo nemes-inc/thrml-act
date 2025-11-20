@@ -1,19 +1,19 @@
 import math
-from typing import List, Tuple
+from typing import List
 
 import jax.numpy as jnp
 import numpy as np
 
-import act
 from act import decompose_signal
-
 
 # =============================================================================
 # Synthetic signal generation (ported from test_act_synthetic.cpp)
 # =============================================================================
 
 
-def chirplet_sample(t: float, tc: float, fc: float, c: float, dt: float, amp: float) -> float:
+def chirplet_sample(
+  t: float, tc: float, fc: float, c: float, dt: float, amp: float
+) -> float:
   """Single Gaussian-enveloped chirp sample (matches C++ chirplet_sample).
 
   Args:
@@ -161,7 +161,9 @@ def run_thrml_act_synthetic(fs: float = 128.0, length: int = 256) -> None:
   output_snr_db = compute_snr_db(clean, recon_np)
   improvement_db = output_snr_db - input_snr_db
 
-  print(f"Output SNR (THRML+ACT): {output_snr_db:.2f} dB, Improvement: {improvement_db:.2f} dB")
+  print(
+    f"Output SNR (THRML+ACT): {output_snr_db:.2f} dB, Improvement: {improvement_db:.2f} dB"
+  )
 
   # 5) Recovered vs ground truth parameter comparison (best-effort matching)
   gt = ground_truth_params(length)
@@ -199,7 +201,7 @@ def run_thrml_act_synthetic(fs: float = 128.0, length: int = 256) -> None:
       dld = rp[2] - g[2]
       dc = rp[3] - g[3]
       print(
-        f"  Atom {r+1}: rec(tc={rp[0]:.2f}, fc={rp[1]:.2f}, logDt={rp[2]:.3f}, c={rp[3]:.2f}) | "
+        f"  Atom {r + 1}: rec(tc={rp[0]:.2f}, fc={rp[1]:.2f}, logDt={rp[2]:.3f}, c={rp[3]:.2f}) | "
         f"gt(tc={g[0]:.2f}, fc={g[1]:.2f}, logDt={g[2]:.3f}, c={g[3]:.2f}) | "
         f"d(tc,fc,logDt,c)=({dtc:.2f}, {dfc:.2f}, {dld:.3f}, {dc:.2f})"
       )

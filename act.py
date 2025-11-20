@@ -43,7 +43,7 @@ def generate_chirplet(
   """
   Generate Gaussian chirplet atom with four parameters
 
-  g(t) = (1/(√(2π)Δt)) * exp(-1/2(t/Δt)²) * exp(j2π[c(t-tc)² + fc(t-tc)])
+  g(t) = (1/(√(2π)Δt)) * exp(-1/2((t-tc)/Δt)²) * exp(j2π[c(t-tc)² + fc(t-tc)])
 
   Args:
     params_array: Array of [tc, fc, logDt, c] chirplet parameters
@@ -51,7 +51,7 @@ def generate_chirplet(
     sampling_rate: Sampling frequency (Hz)
 
   Returns:
-      Complex chirplet atom, unit-energy normalized
+    Chirplet atom, unit L2-energy normalized
   """
   tc, fc, logDt, c = (
     params_array[0],
@@ -157,7 +157,7 @@ def binary_to_params(
     bits_per_param: Number of bits encoding each parameter
 
   Returns:
-      ChirpletParams object with decoded continuous values
+    ChirpletParams object with decoded continuous values
   """
   # Convert spins {-1, 1} to bits {0, 1}
   bits = ((spin_config + 1) / 2).astype(int)
@@ -436,7 +436,7 @@ def bfgs_refine(
     max_iterations: Maximum BFGS iterations
 
   Returns:
-      Refined parameters and final correlation value
+    Refined parameters and final correlation value
   """
   from scipy.optimize import minimize
 
@@ -789,18 +789,18 @@ def benchmark_comparison(signal_length: int = 512, n_trials: int = 5):
   print("Summary:")
   print("THRML + BFGS:")
   print(f"  Avg time: {np.mean(thrml_times):.2f}s ± {np.std(thrml_times):.2f}s")
-  print(
-    f"  Avg correlation: {np.mean(thrml_correlations):.4f} ± {np.std(thrml_correlations):.4f}"
-  )
+  thrml_avg = np.mean(thrml_correlations)
+  thrml_std = np.std(thrml_correlations)
+  print(f"  Avg correlation: {thrml_avg:.4f} ± {thrml_std:.4f}")
   print(
     f"  Success rate: {100 * sum(c > 0.8 for c in thrml_correlations) / n_trials:.0f}%"
   )
 
   print("\nPure BFGS:")
   print(f"  Avg time: {np.mean(bfgs_times):.2f}s ± {np.std(bfgs_times):.2f}s")
-  print(
-    f"  Avg correlation: {np.mean(bfgs_correlations):.4f} ± {np.std(bfgs_correlations):.4f}"
-  )
+  bfgs_avg = np.mean(bfgs_correlations)
+  bfgs_std = np.std(bfgs_correlations)
+  print(f"  Avg correlation: {bfgs_avg:.4f} ± {bfgs_std:.4f}")
   print(
     f"  Success rate: {100 * sum(c > 0.8 for c in bfgs_correlations) / n_trials:.0f}%"
   )
