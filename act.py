@@ -53,24 +53,45 @@ def generate_chirplet(
   Returns:
       Complex chirplet atom, unit-energy normalized
   """
-  tc, fc, logDt, c = params_array[0], params_array[1], params_array[2], params_array[3]
+  tc, fc, logDt, c = (
+    params_array[0],
+    params_array[1],
+    params_array[2],
+    params_array[3],
+  )
+
+  # Clamp logDt to ACT_CPU g() bounds
+  logDt = jnp.clip(logDt, -10.0, 2.0)
+
+  # Convert tc from samples to seconds
+  tc_sec = tc / sampling_rate
 
   # Duration from log-scale
-  Dt = jnp.exp(logDt) * 0.1 * (len(t) / sampling_rate)
+  Dt = jnp.exp(logDt)
 
-  # Time shift (t is already in seconds from optimizer, tc is in samples)
-  t_shifted = t - tc / sampling_rate
+  def _zero_like_t(_):
+    return jnp.zeros_like(t)
 
-  # Gaussian envelope
-  gauss_env = jnp.exp(-0.5 * (t_shifted / Dt) ** 2)
+  def _compute(_):
+    time_diff = t - tc_sec
 
-  # Chirp phase
-  phase = 2 * jnp.pi * (fc * t_shifted + 0.5 * c * t_shifted**2)
+    # Gaussian window with exponent clipping for stability
+    exponent = -0.5 * (time_diff / Dt) ** 2
+    exponent = jnp.clip(exponent, a_min=-50.0, a_max=None)
+    gaussian_window = jnp.exp(exponent)
 
-  chirplet = gauss_env * jnp.cos(phase)
+    # Phase and cosine (match ACT_CPU::g)
+    phase = 2.0 * jnp.pi * (c * time_diff**2 + fc * time_diff)
+    chirplet = gaussian_window * jnp.cos(phase)
 
-  energy = jnp.sqrt(jnp.sum(chirplet**2))
-  return chirplet / jnp.maximum(energy, 1e-10)
+    # L2 normalize
+    energy = jnp.dot(chirplet, chirplet)
+    norm = jnp.sqrt(energy)
+    return jnp.where(norm > 0.0, chirplet / norm, jnp.zeros_like(chirplet))
+
+  bad_Dt = jnp.logical_or(Dt < 1e-10, Dt > 100.0)
+  chirplet = jax.lax.cond(bad_Dt, _zero_like_t, _compute, operand=None)
+  return chirplet
 
 
 @jit
@@ -226,13 +247,15 @@ def compute_data_fit_biases(
     bias: Array of bias values for each spin node
   """
   n_nodes = 4 * bits_per_param
-  biases = np.zeros(n_nodes)
-
   # Sample subset of configurations to estimate biases efficiently
   n_samples = 1000
   rng = np.random.RandomState(42)
 
-  for _ in range(n_samples):
+  # Collect spin configurations and corresponding correlations
+  spin_samples = np.zeros((n_samples, n_nodes), dtype=np.int8)
+  corr_samples = np.zeros(n_samples, dtype=np.float32)
+
+  for idx in range(n_samples):
     # Random spin configuration
     spins = rng.choice([-1, 1], size=n_nodes)
     params = binary_to_params(spins, discrete_grids, bits_per_param)
@@ -243,10 +266,17 @@ def compute_data_fit_biases(
     )
     corr = compute_correlation(signal, chirplet)
 
-    # Update biases (higher correlation -> encourage these spin values)
-    biases += spins * float(corr)
+    spin_samples[idx] = spins
+    corr_samples[idx] = float(corr)
 
-  biases /= n_samples
+  # Fit linear model: spin_samples @ biases ≈ corr_samples
+  X = spin_samples.astype(np.float64)
+  y = corr_samples.astype(np.float64)
+  lambda_reg = 1e-3
+  XtX = X.T @ X + lambda_reg * np.eye(n_nodes)
+  Xty = X.T @ y
+  biases = np.linalg.solve(XtX, Xty)
+
   return biases
 
 
