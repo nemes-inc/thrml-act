@@ -1,6 +1,29 @@
 # THRML Chirplet Transform
 
-Implementation combining THRML discrete sampling with gradient refinement for adaptive chirplet decomposition. By default, the code runs on CPU for maximum compatibility.
+Implementation combining THRML discrete sampling with gradient refinement for adaptive chirplet decomposition.
+
+## Getting Started
+
+> **Note:** This implementation has only been tested on Mac M series laptops. Compatibility with other platforms is not guaranteed. By default, the code runs on CPU for maximum compatibility.
+
+```bash
+# Create the virtual environment
+uv venv .venv
+
+# Sync dependencies
+uv sync
+
+# Activate the virtual environment
+source .venv/bin/activate
+
+# Run the visualization
+python run_visualization.py
+
+# Run the test suite
+python act-challenging-test.py
+python act-profile-test.py
+python act-synth-test.py
+```
 
 ## Usage
 
